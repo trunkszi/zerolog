@@ -1,0 +1,1 @@
+zerolog_add_bench(zerolog_pack_encoder_bench pack_encoder_bench.cc LAYER encode)

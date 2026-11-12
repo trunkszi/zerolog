@@ -1,0 +1,9 @@
+add_executable(zerolog_example_shared_proactor shared_proactor.cc)
+zerolog_configure_internal(zerolog_example_shared_proactor)
+
+add_executable(zerolog_example_standalone_worker standalone_worker.cc)
+zerolog_configure_internal(zerolog_example_standalone_worker)
+target_link_libraries(zerolog_example_standalone_worker PRIVATE pthread)
+
+add_executable(zerolog_example_manual_poll manual_poll.cc)
+zerolog_configure_internal(zerolog_example_manual_poll)

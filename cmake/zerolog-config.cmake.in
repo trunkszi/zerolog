@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+include(CMakeFindDependencyMacro)
+find_dependency(uarch CONFIG REQUIRED)
+find_dependency(uring CONFIG REQUIRED)
+include("${CMAKE_CURRENT_LIST_DIR}/zerolog-targets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/ZerologCompilerOptions.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/ZerologReflection.cmake")
+check_required_components(zerolog)

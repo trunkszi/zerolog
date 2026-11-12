@@ -1,0 +1,261 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  CMAKE_BUILD_PARALLEL_LEVEL: "8"
+
+jobs:
+  cli-and-lint:
+    name: CLI, format, and tidy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      ZEROLOG_CLANG_TIDY_BIN: clang-tidy-23
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential ca-certificates ccache curl git gnupg ninja-build pkg-config python3 xz-utils
+          curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc >/dev/null
+          echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-23 main" | sudo tee /etc/apt/sources.list.d/llvm.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y clang-tidy-23
+      - name: Install CMake 4.0+
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: latest
+      - name: Cache prebuilt toolchains
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/toolchain
+          key: zerolog-toolchain-v0.0.1-ubuntu22-${{ runner.os }}
+          restore-keys: |
+            zerolog-toolchain-v0.0.1-ubuntu22-${{ runner.os }}
+      - name: Configure manifest dependencies
+        env:
+          OVERLAY_PORTS_REPOSITORY: ${{ vars.OVERLAY_PORTS_REPOSITORY || 'https://github.com/trunkszi/vcpkg-ports.git' }}
+        run: |
+          bash .github/scripts/setup-ci-deps.sh
+          cmake -DZEROLOG_TOOLCHAIN_NAME="clang-glibc" -DZEROLOG_BUILD_TESTS=ON -P cmake/ZerologToolchain.cmake
+          mkdir -p "build/clang-glibc-release/tmp"
+          cmake --preset "clang-glibc-release"
+          triplet=$(sed -n 's/^VCPKG_TARGET_TRIPLET:.*=//p' "build/clang-glibc-release/CMakeCache.txt")
+          echo "CMAKE_PREFIX_PATH=${{ github.workspace }}/build/clang-glibc-release/vcpkg_installed/${triplet}" >> "${GITHUB_ENV}"
+      - name: CLI unit tests
+        run: |
+          python3 tests/support/gate_audit_test.py
+          python3 tests/support/tidy_audit_test.py
+          python3 tests/e2e/tier2_audit_test.py
+      - name: Check formatting
+        run: ./zerolog format --check
+      - name: Clang-tidy
+        run: |
+          clang-tidy-23 --version
+          clang-tidy-23 --verify-config
+          ./zerolog tidy --preset clang-glibc-release
+
+  release-and-verify:
+    name: release ${{ matrix.toolchain }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: [clang-glibc, gcc-glibc, clang-musl, gcc-musl]
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential ccache git ninja-build pkg-config python3 xz-utils
+      - name: Install CMake 4.0+
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: latest
+      - name: Cache prebuilt toolchains
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/toolchain
+          key: zerolog-toolchain-v0.0.1-ubuntu22-${{ runner.os }}-${{ matrix.toolchain }}
+          restore-keys: |
+            zerolog-toolchain-v0.0.1-ubuntu22-${{ runner.os }}-
+      - name: Configure manifest dependencies
+        env:
+          OVERLAY_PORTS_REPOSITORY: ${{ vars.OVERLAY_PORTS_REPOSITORY || 'https://github.com/trunkszi/vcpkg-ports.git' }}
+        run: |
+          bash .github/scripts/setup-ci-deps.sh
+          cmake -DZEROLOG_TOOLCHAIN_NAME="${{ matrix.toolchain }}" -DZEROLOG_BUILD_TESTS=ON -P cmake/ZerologToolchain.cmake
+          mkdir -p "build/${{ matrix.toolchain }}-release/tmp"
+          cmake --preset "${{ matrix.toolchain }}-release"
+          triplet=$(sed -n 's/^VCPKG_TARGET_TRIPLET:.*=//p' "build/${{ matrix.toolchain }}-release/CMakeCache.txt")
+          echo "CMAKE_PREFIX_PATH=${{ github.workspace }}/build/${{ matrix.toolchain }}-release/vcpkg_installed/${triplet}" >> "${GITHUB_ENV}"
+      - name: Release tests and verify
+        run: |
+          if [[ -r /proc/sys/kernel/io_uring_disabled && "$(cat /proc/sys/kernel/io_uring_disabled)" != "0" ]]; then
+            sudo sysctl -w kernel.io_uring_disabled=0
+          fi
+          ulimit -l unlimited 2>/dev/null || true
+          ./zerolog test --preset "${{ matrix.toolchain }}-release"
+          ./zerolog verify --tier 1 --preset "${{ matrix.toolchain }}-release"
+      - name: Verify installed CMake package consumer
+        run: |
+          set -euo pipefail
+          preset="${{ matrix.toolchain }}-release"
+          prefix="${RUNNER_TEMP}/zerolog-prefix"
+          compiler="$(sed -n 's/^CMAKE_CXX_COMPILER:[^=]*=//p' "build/${preset}/CMakeCache.txt")"
+          test -n "${compiler}" && test -x "${compiler}"
+          cmake --install "build/${preset}" --prefix "${prefix}"
+          consumer="${RUNNER_TEMP}/zerolog-consumer"
+          mkdir -p "${consumer}"
+          cat > "${consumer}/CMakeLists.txt" <<'EOF'
+          cmake_minimum_required(VERSION 4.0)
+          project(zerolog_consumer LANGUAGES CXX)
+          set(CMAKE_CXX_STANDARD 26)
+          set(CMAKE_CXX_STANDARD_REQUIRED ON)
+          set(CMAKE_CXX_EXTENSIONS OFF)
+          find_package(zerolog CONFIG REQUIRED)
+          add_executable(consumer main.cc)
+          target_link_libraries(consumer PRIVATE zerolog::zerolog)
+          EOF
+          cat > "${consumer}/main.cc" <<'EOF'
+          #include <uarch/uarch.hpp>
+          #include <zerolog/zerolog.hpp>
+          namespace {
+          struct SinkCapture {
+            std::uint32_t bytes = 0;
+            zerolog::Result<std::uint32_t> Write(std::span<const char> data) noexcept {
+              bytes += static_cast<std::uint32_t>(data.size());
+              return static_cast<std::uint32_t>(data.size());
+            }
+          };
+          }  // namespace
+          int main() {
+            SinkCapture cap{};
+            zerolog::WriteCallback cb = uarch::bind<&SinkCapture::Write>(cap);
+            const char msg[] = "ok";
+            auto res = cb(std::span<const char>(msg, 2));
+            return (res.has_value() && *res == 2U && cap.bytes == 2U) ? 0 : 1;
+          }
+          EOF
+          cmake -S "${consumer}" -B "${consumer}/build" -G Ninja \
+            -DCMAKE_CXX_COMPILER="${compiler}" \
+            -DCMAKE_PREFIX_PATH="${prefix};${CMAKE_PREFIX_PATH}" \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build "${consumer}/build"
+          "${consumer}/build/consumer"
+
+  sanitizers:
+    name: ${{ matrix.preset }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - preset: clang-glibc-asan-ubsan
+            toolchain: clang-glibc
+          - preset: gcc-glibc-asan-ubsan
+            toolchain: gcc-glibc
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential ccache git ninja-build pkg-config python3 xz-utils
+      - name: Install CMake 4.0+
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: latest
+      - name: Cache prebuilt toolchains
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/toolchain
+          key: zerolog-toolchain-v0.0.1-ubuntu22-${{ runner.os }}
+          restore-keys: |
+            zerolog-toolchain-v0.0.1-ubuntu22-${{ runner.os }}
+      - name: Configure manifest dependencies
+        env:
+          OVERLAY_PORTS_REPOSITORY: ${{ vars.OVERLAY_PORTS_REPOSITORY || 'https://github.com/trunkszi/vcpkg-ports.git' }}
+        run: |
+          bash .github/scripts/setup-ci-deps.sh
+          cmake -DZEROLOG_TOOLCHAIN_NAME="${{ matrix.toolchain }}" -DZEROLOG_BUILD_TESTS=ON -P cmake/ZerologToolchain.cmake
+          mkdir -p "build/${{ matrix.preset }}/tmp"
+          cmake --preset "${{ matrix.preset }}"
+          triplet=$(sed -n 's/^VCPKG_TARGET_TRIPLET:.*=//p' "build/${{ matrix.preset }}/CMakeCache.txt")
+          echo "CMAKE_PREFIX_PATH=${{ github.workspace }}/build/${{ matrix.preset }}/vcpkg_installed/${triplet}" >> "${GITHUB_ENV}"
+      - name: Sanitizer tests
+        run: |
+          if [[ -r /proc/sys/kernel/io_uring_disabled && "$(cat /proc/sys/kernel/io_uring_disabled)" != "0" ]]; then
+            sudo sysctl -w kernel.io_uring_disabled=0
+          fi
+          ulimit -l unlimited 2>/dev/null || true
+          ./zerolog test --preset "${{ matrix.preset }}"
+      - name: Verify installed CMake package consumer
+        run: |
+          set -euo pipefail
+          preset="${{ matrix.preset }}"
+          prefix="${RUNNER_TEMP}/zerolog-prefix"
+          compiler="$(sed -n 's/^CMAKE_CXX_COMPILER:[^=]*=//p' "build/${preset}/CMakeCache.txt")"
+          test -n "${compiler}" && test -x "${compiler}"
+          cmake --install "build/${preset}" --prefix "${prefix}"
+          consumer="${RUNNER_TEMP}/zerolog-consumer"
+          mkdir -p "${consumer}"
+          cat > "${consumer}/CMakeLists.txt" <<'EOF'
+          cmake_minimum_required(VERSION 4.0)
+          project(zerolog_consumer LANGUAGES CXX)
+          set(CMAKE_CXX_STANDARD 26)
+          set(CMAKE_CXX_STANDARD_REQUIRED ON)
+          set(CMAKE_CXX_EXTENSIONS OFF)
+          find_package(zerolog CONFIG REQUIRED)
+          add_executable(consumer main.cc)
+          target_link_libraries(consumer PRIVATE zerolog::zerolog)
+          EOF
+          cat > "${consumer}/main.cc" <<'EOF'
+          #include <uarch/uarch.hpp>
+          #include <zerolog/zerolog.hpp>
+          namespace {
+          struct SinkCapture {
+            std::uint32_t bytes = 0;
+            zerolog::Result<std::uint32_t> Write(std::span<const char> data) noexcept {
+              bytes += static_cast<std::uint32_t>(data.size());
+              return static_cast<std::uint32_t>(data.size());
+            }
+          };
+          }  // namespace
+          int main() {
+            SinkCapture cap{};
+            zerolog::WriteCallback cb = uarch::bind<&SinkCapture::Write>(cap);
+            const char msg[] = "ok";
+            auto res = cb(std::span<const char>(msg, 2));
+            return (res.has_value() && *res == 2U && cap.bytes == 2U) ? 0 : 1;
+          }
+          EOF
+          cmake -S "${consumer}" -B "${consumer}/build" -G Ninja \
+            -DCMAKE_CXX_COMPILER="${compiler}" \
+            -DCMAKE_PREFIX_PATH="${prefix};${CMAKE_PREFIX_PATH}" \
+            -DCMAKE_BUILD_TYPE=Release
+          cmake --build "${consumer}/build"
+          "${consumer}/build/consumer"

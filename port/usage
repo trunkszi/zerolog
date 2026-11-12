@@ -1,0 +1,4 @@
+zerolog provides CMake targets:
+
+  find_package(zerolog CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE zerolog::zerolog)

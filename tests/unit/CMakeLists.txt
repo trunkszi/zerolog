@@ -1,0 +1,7 @@
+add_subdirectory(error)
+add_subdirectory(abi)
+add_subdirectory(sys)
+add_subdirectory(core)
+add_subdirectory(encode)
+add_subdirectory(format)
+add_subdirectory(sink)

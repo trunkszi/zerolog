@@ -1,0 +1,1 @@
+zerolog_add_test(zerolog_encode_pack_roundtrip_test pack_roundtrip_test.cc LAYER encode)

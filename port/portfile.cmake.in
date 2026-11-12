@@ -1,0 +1,39 @@
+vcpkg_check_linkage(ONLY_STATIC_LIBRARY)
+set(VCPKG_BUILD_TYPE release)
+set(VCPKG_POLICY_EMPTY_PACKAGE enabled)
+
+vcpkg_from_github(
+    OUT_SOURCE_PATH SOURCE_PATH
+    REPO trunkszi/zerolog
+    REF "v@VERSION@"
+    SHA512 @SHA512@
+    HEAD_REF main
+)
+
+file(REMOVE "${SOURCE_PATH}/vcpkg.json" "${SOURCE_PATH}/vcpkg-configuration.json")
+
+vcpkg_cmake_configure(
+    SOURCE_PATH "${SOURCE_PATH}"
+    OPTIONS
+        -DVCPKG_MANIFEST_MODE=OFF
+        -DCMAKE_INSTALL_LIBDIR=lib
+        -DZEROLOG_AUTO_DOWNLOAD_TOOLCHAIN=OFF
+        -DZEROLOG_BUILD_TESTS=OFF
+        -DZEROLOG_BUILD_TOOLS=OFF
+        -DZEROLOG_BUILD_BENCHES=OFF
+        -DZEROLOG_BUILD_EXAMPLES=OFF
+        -DZEROLOG_ENABLE_SANITIZERS=OFF
+        -DZEROLOG_INSTALL_PACKAGE=ON
+)
+
+vcpkg_cmake_install()
+
+vcpkg_cmake_config_fixup(
+    PACKAGE_NAME zerolog
+    CONFIG_PATH lib/cmake/zerolog
+)
+
+file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
+
+vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/LICENSE")
+file(INSTALL "${CMAKE_CURRENT_LIST_DIR}/usage" DESTINATION "${CURRENT_PACKAGES_DIR}/share/${PORT}")

@@ -1,0 +1,20 @@
+{
+  "name": "zerolog",
+  "version-semver": "0.1.0",
+  "description": "C++26 low-latency structured logging library with per-thread huge-page SPSC rings and io_uring/futex2 consumer formatting",
+  "homepage": "https://github.com/trunkszi/zerolog",
+  "license": "MIT",
+  "supports": "linux & x64",
+  "dependencies": [
+    "uarch",
+    "uring",
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ]
+}

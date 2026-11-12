@@ -1,0 +1,9 @@
+zerolog_add_test(zerolog_abi_contract_test abi/contract_test.cc)
+target_include_directories(zerolog_abi_contract_test PRIVATE "${ZEROLOG_TESTS_ROOT_DIR}")
+
+zerolog_add_test(zerolog_core_layout_test core/layout_test.cc)
+target_include_directories(zerolog_core_layout_test PRIVATE "${ZEROLOG_TESTS_ROOT_DIR}")
+target_link_libraries(zerolog_core_layout_test PRIVATE Threads::Threads)
+
+zerolog_add_test(zerolog_encode_bytes_test encode/encoded_bytes_test.cc)
+zerolog_add_test(zerolog_format_string_test format/format_string_test.cc)

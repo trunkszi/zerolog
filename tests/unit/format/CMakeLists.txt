@@ -1,0 +1,6 @@
+zerolog_add_test(zerolog_format_number_test number_format_test.cc LAYER format)
+zerolog_add_test(zerolog_format_header_cache_test header_cache_test.cc LAYER format)
+zerolog_add_test(zerolog_format_consteval_parser_test consteval_parser_test.cc LAYER format)
+zerolog_add_test(zerolog_format_output_buffer_test output_buffer_test.cc LAYER format)
+
+target_include_directories(zerolog_format_output_buffer_test PRIVATE "${ZEROLOG_TESTS_ROOT_DIR}")

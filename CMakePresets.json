@@ -1,0 +1,448 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 4,
+    "minor": 0,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "clang-glibc-base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_CXX_SCAN_FOR_MODULES": false,
+        "CMAKE_EXPORT_COMPILE_COMMANDS": true,
+        "CMAKE_TOOLCHAIN_FILE": "$penv{HOME}/.vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "ZEROLOG_BUILD_TESTS": true,
+        "ZEROLOG_BUILD_BENCHES": true,
+        "ZEROLOG_BUILD_EXAMPLES": true,
+        "ZEROLOG_TOOLCHAIN_NAME": "clang-glibc",
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchain/clang-glibc.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-linux-clang-glibc",
+        "VCPKG_HOST_TRIPLET": "x64-linux-gcc-glibc",
+        "VCPKG_OVERLAY_PORTS": "$penv{HOME}/.local/vcpkg",
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/cmake/triplets",
+        "VCPKG_INSTALLED_DIR": "${sourceDir}/build/${presetName}/vcpkg_installed",
+        "VCPKG_MANIFEST_FEATURES": "tools",
+        "VCPKG_INSTALL_OPTIONS": "--no-print-usage"
+      },
+      "environment": {
+        "CCACHE_DIR": "$penv{HOME}/.cache/ccache",
+        "VCPKG_DEFAULT_BINARY_CACHE": "$penv{HOME}/.cache/vcpkg/archives",
+        "VCPKG_FORCE_SYSTEM_BINARIES": "1",
+        "VCPKG_MAX_CONCURRENCY": "8",
+        "TMPDIR": "${sourceDir}/build/${presetName}/tmp",
+        "TMP": "${sourceDir}/build/${presetName}/tmp",
+        "TEMP": "${sourceDir}/build/${presetName}/tmp"
+      }
+    },
+    {
+      "name": "gcc-glibc-base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_CXX_SCAN_FOR_MODULES": false,
+        "CMAKE_EXPORT_COMPILE_COMMANDS": true,
+        "CMAKE_TOOLCHAIN_FILE": "$penv{HOME}/.vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "ZEROLOG_BUILD_TESTS": true,
+        "ZEROLOG_BUILD_BENCHES": true,
+        "ZEROLOG_BUILD_EXAMPLES": true,
+        "ZEROLOG_TOOLCHAIN_NAME": "gcc-glibc",
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchain/gcc-glibc.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-linux-gcc-glibc",
+        "VCPKG_HOST_TRIPLET": "x64-linux-gcc-glibc",
+        "VCPKG_OVERLAY_PORTS": "$penv{HOME}/.local/vcpkg",
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/cmake/triplets",
+        "VCPKG_INSTALLED_DIR": "${sourceDir}/build/${presetName}/vcpkg_installed",
+        "VCPKG_MANIFEST_FEATURES": "tools",
+        "VCPKG_INSTALL_OPTIONS": "--no-print-usage"
+      },
+      "environment": {
+        "CCACHE_DIR": "$penv{HOME}/.cache/ccache",
+        "VCPKG_DEFAULT_BINARY_CACHE": "$penv{HOME}/.cache/vcpkg/archives",
+        "VCPKG_FORCE_SYSTEM_BINARIES": "1",
+        "VCPKG_MAX_CONCURRENCY": "8",
+        "TMPDIR": "${sourceDir}/build/${presetName}/tmp",
+        "TMP": "${sourceDir}/build/${presetName}/tmp",
+        "TEMP": "${sourceDir}/build/${presetName}/tmp"
+      }
+    },
+    {
+      "name": "clang-musl-base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_CXX_SCAN_FOR_MODULES": false,
+        "CMAKE_EXPORT_COMPILE_COMMANDS": true,
+        "CMAKE_TOOLCHAIN_FILE": "$penv{HOME}/.vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "ZEROLOG_BUILD_TESTS": true,
+        "ZEROLOG_BUILD_BENCHES": true,
+        "ZEROLOG_BUILD_EXAMPLES": true,
+        "ZEROLOG_TOOLCHAIN_NAME": "clang-musl",
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchain/clang-musl.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-linux-clang-musl",
+        "VCPKG_HOST_TRIPLET": "x64-linux-gcc-glibc",
+        "VCPKG_OVERLAY_PORTS": "$penv{HOME}/.local/vcpkg",
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/cmake/triplets",
+        "VCPKG_INSTALLED_DIR": "${sourceDir}/build/${presetName}/vcpkg_installed",
+        "VCPKG_MANIFEST_FEATURES": "tools",
+        "VCPKG_INSTALL_OPTIONS": "--no-print-usage"
+      },
+      "environment": {
+        "CCACHE_DIR": "$penv{HOME}/.cache/ccache",
+        "VCPKG_DEFAULT_BINARY_CACHE": "$penv{HOME}/.cache/vcpkg/archives",
+        "VCPKG_FORCE_SYSTEM_BINARIES": "1",
+        "VCPKG_MAX_CONCURRENCY": "8",
+        "TMPDIR": "${sourceDir}/build/${presetName}/tmp",
+        "TMP": "${sourceDir}/build/${presetName}/tmp",
+        "TEMP": "${sourceDir}/build/${presetName}/tmp"
+      }
+    },
+    {
+      "name": "gcc-musl-base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_CXX_SCAN_FOR_MODULES": false,
+        "CMAKE_EXPORT_COMPILE_COMMANDS": true,
+        "CMAKE_TOOLCHAIN_FILE": "$penv{HOME}/.vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "ZEROLOG_BUILD_TESTS": true,
+        "ZEROLOG_BUILD_BENCHES": true,
+        "ZEROLOG_BUILD_EXAMPLES": true,
+        "ZEROLOG_TOOLCHAIN_NAME": "gcc-musl",
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/toolchain/gcc-musl.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-linux-gcc-musl",
+        "VCPKG_HOST_TRIPLET": "x64-linux-gcc-glibc",
+        "VCPKG_OVERLAY_PORTS": "$penv{HOME}/.local/vcpkg",
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/cmake/triplets",
+        "VCPKG_INSTALLED_DIR": "${sourceDir}/build/${presetName}/vcpkg_installed",
+        "VCPKG_MANIFEST_FEATURES": "tools",
+        "VCPKG_INSTALL_OPTIONS": "--no-print-usage"
+      },
+      "environment": {
+        "CCACHE_DIR": "$penv{HOME}/.cache/ccache",
+        "VCPKG_DEFAULT_BINARY_CACHE": "$penv{HOME}/.cache/vcpkg/archives",
+        "VCPKG_FORCE_SYSTEM_BINARIES": "1",
+        "VCPKG_MAX_CONCURRENCY": "8",
+        "TMPDIR": "${sourceDir}/build/${presetName}/tmp",
+        "TMP": "${sourceDir}/build/${presetName}/tmp",
+        "TEMP": "${sourceDir}/build/${presetName}/tmp"
+      }
+    },
+    {
+      "name": "clang-glibc-release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/clang-glibc-release",
+      "inherits": "clang-glibc-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "ZEROLOG_ENABLE_SANITIZERS": false
+      }
+    },
+    {
+      "name": "clang-glibc-debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/clang-glibc-debug",
+      "inherits": "clang-glibc-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ZEROLOG_ENABLE_SANITIZERS": false
+      }
+    },
+    {
+      "name": "clang-glibc-asan-ubsan",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/clang-glibc-asan-ubsan",
+      "inherits": "clang-glibc-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ZEROLOG_ENABLE_SANITIZERS": true,
+        "VCPKG_TARGET_TRIPLET": "x64-linux-clang-glibc-asan"
+      }
+    },
+    {
+      "name": "gcc-glibc-release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/gcc-glibc-release",
+      "inherits": "gcc-glibc-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "ZEROLOG_ENABLE_SANITIZERS": false
+      }
+    },
+    {
+      "name": "gcc-glibc-debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/gcc-glibc-debug",
+      "inherits": "gcc-glibc-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ZEROLOG_ENABLE_SANITIZERS": false
+      }
+    },
+    {
+      "name": "gcc-glibc-asan-ubsan",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/gcc-glibc-asan-ubsan",
+      "inherits": "gcc-glibc-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ZEROLOG_ENABLE_SANITIZERS": true,
+        "VCPKG_TARGET_TRIPLET": "x64-linux-gcc-glibc-asan"
+      }
+    },
+    {
+      "name": "clang-musl-release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/clang-musl-release",
+      "inherits": "clang-musl-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "ZEROLOG_ENABLE_SANITIZERS": false
+      }
+    },
+    {
+      "name": "clang-musl-debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/clang-musl-debug",
+      "inherits": "clang-musl-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ZEROLOG_ENABLE_SANITIZERS": false
+      }
+    },
+    {
+      "name": "gcc-musl-release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/gcc-musl-release",
+      "inherits": "gcc-musl-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "ZEROLOG_ENABLE_SANITIZERS": false
+      }
+    },
+    {
+      "name": "gcc-musl-debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/gcc-musl-debug",
+      "inherits": "gcc-musl-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ZEROLOG_ENABLE_SANITIZERS": false
+      }
+    },
+    {
+      "name": "clang-musl-asan-ubsan",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/clang-musl-asan-ubsan",
+      "inherits": "clang-musl-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ZEROLOG_ENABLE_SANITIZERS": true
+      }
+    },
+    {
+      "name": "gcc-musl-asan-ubsan",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/gcc-musl-asan-ubsan",
+      "inherits": "gcc-musl-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ZEROLOG_ENABLE_SANITIZERS": true
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "clang-glibc-release",
+      "configurePreset": "clang-glibc-release",
+      "jobs": 8
+    },
+    {
+      "name": "clang-glibc-debug",
+      "configurePreset": "clang-glibc-debug",
+      "jobs": 8
+    },
+    {
+      "name": "clang-glibc-asan-ubsan",
+      "configurePreset": "clang-glibc-asan-ubsan",
+      "jobs": 8
+    },
+    {
+      "name": "gcc-glibc-release",
+      "configurePreset": "gcc-glibc-release",
+      "jobs": 8
+    },
+    {
+      "name": "gcc-glibc-debug",
+      "configurePreset": "gcc-glibc-debug",
+      "jobs": 8
+    },
+    {
+      "name": "gcc-glibc-asan-ubsan",
+      "configurePreset": "gcc-glibc-asan-ubsan",
+      "jobs": 8
+    },
+    {
+      "name": "clang-musl-release",
+      "configurePreset": "clang-musl-release",
+      "jobs": 8
+    },
+    {
+      "name": "clang-musl-debug",
+      "configurePreset": "clang-musl-debug",
+      "jobs": 8
+    },
+    {
+      "name": "gcc-musl-release",
+      "configurePreset": "gcc-musl-release",
+      "jobs": 8
+    },
+    {
+      "name": "gcc-musl-debug",
+      "configurePreset": "gcc-musl-debug",
+      "jobs": 8
+    },
+    {
+      "name": "clang-musl-asan-ubsan",
+      "configurePreset": "clang-musl-asan-ubsan",
+      "jobs": 8
+    },
+    {
+      "name": "gcc-musl-asan-ubsan",
+      "configurePreset": "gcc-musl-asan-ubsan",
+      "jobs": 8
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "clang-glibc-release",
+      "configurePreset": "clang-glibc-release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "jobs": 8
+      }
+    },
+    {
+      "name": "clang-glibc-debug",
+      "configurePreset": "clang-glibc-debug",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "jobs": 8
+      }
+    },
+    {
+      "name": "clang-glibc-asan-ubsan",
+      "configurePreset": "clang-glibc-asan-ubsan",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "jobs": 8
+      }
+    },
+    {
+      "name": "gcc-glibc-release",
+      "configurePreset": "gcc-glibc-release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "jobs": 8
+      }
+    },
+    {
+      "name": "gcc-glibc-debug",
+      "configurePreset": "gcc-glibc-debug",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "jobs": 8
+      }
+    },
+    {
+      "name": "gcc-glibc-asan-ubsan",
+      "configurePreset": "gcc-glibc-asan-ubsan",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "jobs": 8
+      }
+    },
+    {
+      "name": "clang-musl-release",
+      "configurePreset": "clang-musl-release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "jobs": 8
+      }
+    },
+    {
+      "name": "clang-musl-debug",
+      "configurePreset": "clang-musl-debug",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "jobs": 8
+      }
+    },
+    {
+      "name": "gcc-musl-release",
+      "configurePreset": "gcc-musl-release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "jobs": 8
+      }
+    },
+    {
+      "name": "gcc-musl-debug",
+      "configurePreset": "gcc-musl-debug",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "jobs": 8
+      }
+    },
+    {
+      "name": "clang-musl-asan-ubsan",
+      "configurePreset": "clang-musl-asan-ubsan",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "jobs": 8
+      }
+    },
+    {
+      "name": "gcc-musl-asan-ubsan",
+      "configurePreset": "gcc-musl-asan-ubsan",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "jobs": 8
+      }
+    }
+  ]
+}

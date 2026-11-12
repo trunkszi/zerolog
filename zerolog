@@ -1,0 +1,8 @@
+#!/usr/bin/env -S uv run --python 3.14 --script
+# /// script
+# requires-python = ">=3.14"
+# dependencies = []
+# ///
+from scripts.cli.main import main
+if __name__ == "__main__":
+    main()
