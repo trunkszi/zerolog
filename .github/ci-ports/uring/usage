@@ -1,0 +1,4 @@
+uring provides CMake targets:
+
+    find_package(uring CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE uring::uring)

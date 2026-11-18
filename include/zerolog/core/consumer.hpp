@@ -1,19 +1,13 @@
 /** @file @brief Exclusive consumer handles and synchronous polling over persistent merge/output state. */
 #pragma once
+#include <cstddef>
 #include <memory>
 #include <zerolog/core/consumer_core.hpp>
 #include <zerolog/core/lease.hpp>
 namespace zerolog::core {
-/** @brief The lease protects initialization and all accesses; pending bytes survive owner handoffs. */
-union ConsumerStorage {
-  char dummy{};
-  ConsumerCore value;
-  constexpr ConsumerStorage() noexcept : dummy{} {}
-  // Late static destructors may still log or poll; process teardown owns these mappings.
-  ~ConsumerStorage() noexcept {}
-};
-inline constinit ConsumerStorage g_consumer_core;
-inline constinit bool g_consumer_initialized = false;
+// A lease protects construction and access. Process-lifetime storage remains available to late static destructors.
+alignas(ConsumerCore) inline constinit std::byte g_consumer_storage[sizeof(ConsumerCore)]{};
+inline constinit ConsumerCore* g_consumer_core = nullptr;
 /** @brief A move-only right to operate on the process consumer's stable storage. */
 class LogConsumer final {
  public:
@@ -24,13 +18,12 @@ class LogConsumer final {
   /** @brief Initialize once under a valid lease; an invalid handle never accesses shared state. */
   [[nodiscard]] static Result<LogConsumer> Create(ConsumerLease lease) noexcept {
     if (!lease.Valid() || ConsumerReentry()) return std::unexpected(ErrorCode::kConsumerBusy);
-    if (!g_consumer_initialized) {
+    if (g_consumer_core == nullptr) {
       auto created = ConsumerCore::Create();
       if (!created) return std::unexpected(created.error());
-      std::construct_at(&g_consumer_core.value, std::move(*created));
-      g_consumer_initialized = true;
+      g_consumer_core = std::construct_at(reinterpret_cast<ConsumerCore*>(g_consumer_storage), std::move(*created));
     }
-    return LogConsumer{std::move(lease), &g_consumer_core.value};
+    return LogConsumer{std::move(lease), g_consumer_core};
   }
   /** @brief Format without calling a synchronous writer; external proactors use this operation. */
   [[nodiscard]] Result<abi::DrainStats> DrainBatch(abi::DrainBudget budget = {}) noexcept {

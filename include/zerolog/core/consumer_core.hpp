@@ -132,7 +132,7 @@ class ConsumerCore final {
   }
   [[nodiscard]] ErrorCode SetWriter(WriteCallback writer) noexcept {
     if (!writer) return ErrorCode::kInvalidArgument;
-    writer_ = writer;
+    this->writer_ = writer;
     return ErrorCode::kSuccess;
   }
   [[nodiscard]] ErrorCode SetOutputFd(int fd) noexcept {
@@ -188,7 +188,7 @@ class ConsumerCore final {
     }
     return ErrorCode::kSuccess;
   }
-  [[nodiscard]] Result<std::uint32_t> Write(std::span<const char> bytes) noexcept {
+  [[nodiscard]] Result<std::uint32_t> Write(std::span<const char> bytes) const noexcept {
     if (writer_) return writer_(bytes);
     for (;;) {
       const auto count = ::write(fd_, bytes.data(), bytes.size());

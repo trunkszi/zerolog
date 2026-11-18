@@ -1,0 +1,20 @@
+{
+  "name": "uring",
+  "version-semver": "0.1.0",
+  "port-version": 0,
+  "description": "C++26 runtime-free io_uring and futex2 proactor framework",
+  "homepage": "https://github.com/trunkszi/uring",
+  "license": "MIT",
+  "supports": "linux & x64",
+  "dependencies": [
+    "uarch",
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ]
+}

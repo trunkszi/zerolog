@@ -1,0 +1,21 @@
+uarch provides C++26 CMake targets:
+
+    find_package(uarch CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE uarch::uarch)
+
+uarch::uarch is the hosted umbrella over uarch::primitives (uarch::tiers,
+uarch::core, uarch::arch) and uarch::detect (static libuarch_detect.a).
+uarch::primitives (alias uarch::freestanding) is the runtime-free header-only
+primitives umbrella (<uarch/primitives.hpp>).
+
+A working C++26 reflection compiler is required. The installed configuration
+checks structural annotations, expansion statements and the other upstream
+reflection requirements; this check is deliberately retained. Clang requires
+its reflection-enabled build with libc++; Clang with libstdc++ is unsupported
+and fails the upstream reflection probe. GCC 16 with -freflection is the verified
+configuration. The existing clang-glibc libstdc++ wrapper is not supported.
+The imported targets propagate the appropriate reflection options.
+
+Headers: <uarch/uarch.hpp> and <uarch/detect/detect.hpp>.
+Detection audits the caller's existing affinity domain and never changes it;
+see the upstream detection policy for multi-CPU evidence requirements.

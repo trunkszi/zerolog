@@ -1,0 +1,24 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+  "name": "uarch",
+  "version": "0.1.0",
+  "port-version": 1,
+  "description": [
+    "uarch — runtime-free C++26 microarchitectural primitives and compile-time TMA layout/reflection contracts.",
+    "Provides header-only interface layers (uarch::primitives / uarch::freestanding, uarch::tiers, uarch::core, uarch::arch), the hosted umbrella (uarch::uarch), and the static CPUID/host capability detection library (uarch::detect).",
+    "Requires a C++26 reflection toolchain: GCC 16 with -freflection, or reflection-enabled Clang with libc++. Clang with libstdc++ is unsupported and fails the upstream reflection probe."
+  ],
+  "homepage": "https://github.com/trunkszi/uarch",
+  "license": "MIT",
+  "supports": "linux & x64",
+  "dependencies": [
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ]
+}
