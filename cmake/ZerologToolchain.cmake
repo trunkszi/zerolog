@@ -229,12 +229,10 @@ function(_zerolog_provision_sdk sdk_name distro)
 endfunction()
 
 function(zerolog_ensure_toolchain)
-  # add_subdirectory() inherits the parent's PROJECT_IS_TOP_LEVEL=TRUE before this
-  # file reaches its own project(). Compare source directories first.
-  if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    return()
-  endif()
-  if(NOT ZEROLOG_AUTO_DOWNLOAD_TOOLCHAIN)
+  # The parent owns SDK provisioning for add_subdirectory() consumers. An explicit
+  # script invocation can also check the installed SDKs with downloads disabled.
+  if(NOT DEFINED CMAKE_SCRIPT_MODE_FILE AND
+     (NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR OR NOT ZEROLOG_AUTO_DOWNLOAD_TOOLCHAIN))
     return()
   endif()
   _zerolog_infer_toolchain_name(toolchain_name)
@@ -261,6 +259,8 @@ function(zerolog_ensure_toolchain)
   if(uses_sdk AND NOT EXISTS "${compiler_path}")
     message(FATAL_ERROR "Toolchain archive did not contain ${rel_compiler}")
   endif()
+  # vcpkg builds host dependencies with gcc-glibc for every target preset.
+  _zerolog_provision_sdk("gcc-glibc" "${ZEROLOG_TOOLCHAIN_DISTRO}")
   # option() has not run yet. -D defines these; otherwise llvm tools and the foreign compiler
   # are required whenever tests or tools will be built.
   if(((NOT DEFINED BUILD_TESTING OR BUILD_TESTING) AND (NOT DEFINED ZEROLOG_BUILD_TESTS OR ZEROLOG_BUILD_TESTS)) OR ZEROLOG_BUILD_TOOLS)
@@ -270,3 +270,7 @@ function(zerolog_ensure_toolchain)
     endif()
   endif()
 endfunction()
+
+if(CMAKE_SCRIPT_MODE_FILE STREQUAL CMAKE_CURRENT_LIST_FILE)
+  zerolog_ensure_toolchain()
+endif()
